@@ -1,6 +1,6 @@
 {
     "apps": [{
-        "name": "sport_server",
+        "name": "xiaoyun_server",
         "script": "./bin/www",
         "cwd": "./",
         "watch": [
@@ -11,7 +11,7 @@
             "controller"
         ],
         "exec_mode": "cluster_mode",
-        "instances": 4,
+        "instances": 2,
         "error_file": "./logs/app-err.log",
         "out_file": "./logs/app-out.log",
         "log_date_format": "YYYY-MM-DD HH:mm Z"
