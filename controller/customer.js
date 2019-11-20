@@ -148,7 +148,7 @@ function verifyCode(req, res, next) {
     html: `<br>请尽快输入验证码：</br> <p> ${code} </p>` // html body HTML格式的内容
   };
   req.getConnection(function(err, conn) {
-    if(err) {
+    if (err) {
       console.log("db error", err);
       return next("db error" + err);
     }
@@ -279,7 +279,7 @@ function login(req, res, next) {
             desc: "no user"
           })
         );
-      } else if (rows[0].pwd != password) {
+      } else if (rows[0].password != password) {
         res.send(
           JSON.stringify({
             code: 1,
@@ -308,11 +308,51 @@ function generateShareCode() {
   return uuid;
 }
 
+function fixpwd(req, res, next) {
+  let phone = req.query.account || req.body.account || "",
+    password = req.query.password || req.body.password || "";
+
+  if (password == "") {
+    res.send(
+      JSON.stringify({
+        code: 3,
+        desc: "invalid input"
+      })
+    );
+    return;
+  }
+
+  req.getConnection(function(err, conn) {
+    if (err) return next(err);
+
+    var sql = "UPDATE customer SET `password` = ? WHERE account = ?";
+
+    conn.query(sql, [password, phone], function(err, rows) {
+      if (err) {
+        res.send(
+          JSON.stringify({
+            code: 1,
+            desc: "set pwd error"
+          })
+        );
+        return next("login error" + err);
+      } else
+        res.send(
+          JSON.stringify({
+            code: 0,
+            desc: "set pwd success"
+          })
+        );
+    });
+  });
+}
+
 module.exports = {
   uploadstorefile: uploadStoreFile,
   login: login,
   register: register,
   getcode: verifyCode,
+  fixpwd: fixpwd,
   sendmail: sendCutomMail,
   readfile: readExcel
 };
