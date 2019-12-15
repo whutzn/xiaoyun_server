@@ -98,6 +98,12 @@ function readExcel(req, res, next) {
             }
             curData.push(element[10]);
             curData.push(element[11]);
+            curData.push(element[5] || 0);
+            curData.push(element[6] || 0);
+            curData.push(element[7] || 0);
+            curData.push(element[23] || 0);
+            curData.push(element[24] || 0);
+            curData.push(element[25] || 0);
             queryData.push(curData);
             // console.log(curId, curData);
         }
@@ -106,7 +112,7 @@ function readExcel(req, res, next) {
     req.getConnection(function(err, conn) {
         if (err) return next(err);
         let addSQL =
-            "INSERT INTO air_trans_query(airline,airline_code,dep_airport_cn,dep_airport_en,dep_airport_code,dep_airport_country,des_airport_cn,des_airport_en,des_airport_code,des_airport_country) VALUES ?";
+            "INSERT INTO `word2.0`.`air_trans_query`(`airline`, `airline_code`, `dep_airport_cn`, `dep_airport_en`, `dep_airport_code`, `dep_airport_country`, `des_airport_cn`, `des_airport_en`, `des_airport_code`, `des_airport_country`, `dep_delcare`, `dep_thc`, `dep_doc`, `des_delcare`, `des_thc`, `des_doc`) VALUES ?";
 
         conn.query(addSQL, [queryData], function(err, rows) {
             if (err) {
@@ -385,6 +391,51 @@ function fixpwd(req, res, next) {
     });
 }
 
+function airQuery(req, res, next) {
+    let start = req.query.start || req.body.start || "",
+        end = req.query.end || req.body.end || "";
+
+    if (start == "" && end == "") {
+        res.send(
+            JSON.stringify({
+                code: 3,
+                desc: "invalid input"
+            })
+        );
+        return;
+    }
+
+    req.getConnection(function(err, conn) {
+        if (err) return next(err);
+
+        let sql = "SELECT * FROM air_trans_query WHERE CONCAT(dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" + start + "%' AND CONCAT(des_airport_cn,des_airport_en,des_airport_code) LIKE '%" + end + "%'";
+
+        if (start == "") {
+            sql = "SELECT DISTINCT des_airport_cn,des_airport_en,des_airport_code  FROM air_trans_query WHERE CONCAT(des_airport_cn,des_airport_en,des_airport_code) LIKE '%" + end + "%'";
+        }
+        if (end == "") {
+            sql = "SELECT DISTINCT dep_airport_cn,dep_airport_en,dep_airport_code  FROM air_trans_query WHERE CONCAT(dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" + start + "%'";
+        }
+
+        conn.query(sql, [], function(err, rows) {
+            if (err) {
+                res.send(
+                    JSON.stringify({
+                        code: 1,
+                        desc: "air query error"
+                    })
+                );
+            } else
+                res.send(
+                    JSON.stringify({
+                        code: 0,
+                        desc: rows
+                    })
+                );
+        });
+    });
+}
+
 module.exports = {
     uploadstorefile: uploadStoreFile,
     login: login,
@@ -392,5 +443,6 @@ module.exports = {
     getcode: verifyCode,
     fixpwd: fixpwd,
     sendmail: sendCutomMail,
-    readfile: readExcel
+    readfile: readExcel,
+    airquery: airQuery
 };

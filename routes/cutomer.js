@@ -11,4 +11,6 @@ router.post("/fixpwd", customerRoute.fixpwd);
 router.post("/sendmail", customerRoute.sendmail);
 router.post("/readfile", customerRoute.readfile);
 
+router.post("/airquery", customerRoute.airquery);
+
 module.exports = router;
