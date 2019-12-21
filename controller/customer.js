@@ -20,14 +20,14 @@ let transporter = nodemailer.createTransport({
     secureConnection: true, // 使用了SSL
     secure: true, // true for 465, false for other ports
     auth: {
-        user: "service@sharingfreight.com",
-        pass: "eTPmbZGkNDvhQzUF" // 这里密码不是qq密码，是你设置的smtp授权码
+        user: "sale@sharingfreight.com",
+        pass: "B4sCTkePs3ZxJR3G" // 这里密码不是qq密码，是你设置的smtp授权码
     }
 });
 
 // 填写邮件信息
 let mailOptions = {
-    from: '"客户服务" <service@sharingfreight.com>', // 发件人
+    from: '"客户服务" <sale@sharingfreight.com>', // 发件人
     to: "whutzn@foxmail.com", // 收件人
     subject: "测试邮件", // 标题
     // 发送text或者html格式
@@ -184,7 +184,7 @@ function verifyCode(req, res, next) {
         code = generateShareCode();
 
     let codemailOptions = {
-        from: '"客户服务" <service@sharingfreight.com>', // 发件人
+        from: '"客户服务" <sale@sharingfreight.com>', // 发件人
         to: account, // 收件人
         subject: "测试邮件", // 标题
         // 发送text或者html格式
