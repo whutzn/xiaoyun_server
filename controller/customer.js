@@ -131,52 +131,6 @@ function readExcel(req, res, next) {
     });
 }
 
-function uploadStoreFile(req, res, next) {
-    upload.single("file")(req, res, function(err) {
-        if (err instanceof multer.MulterError) {
-            console.log("upload store file1", err);
-            res.send({
-                code: 1,
-                desc: err
-            });
-        } else if (err) {
-            console.log("upload store file2", err);
-            res.send({
-                code: 1,
-                desc: err
-            });
-        }
-        let metadata = [
-            req.file.filename,
-            req.file.encoding,
-            req.file.mimetype,
-            req.file.size,
-            req.file.path,
-            new Date()
-        ];
-        req.getConnection(function(err, conn) {
-            if (err) return next(err);
-            let addSQL =
-                "INSERT INTO storefiles(filename, encoding, mimetype, size, filepath, addTime) VALUES ( ? )";
-
-            conn.query(addSQL, [metadata], function(err, rows) {
-                if (err) {
-                    console.error("query error" + err);
-                    res.send({
-                        code: 1,
-                        desc: "database error"
-                    });
-                } else {
-                    res.send({
-                        code: 0,
-                        desc: rows.insertId
-                    });
-                }
-            });
-        });
-    });
-}
-
 function verifyCode(req, res, next) {
     let account = req.query.account || req.body.account || "",
         mode = req.query.mode || req.body.mode || 0, //1 为注册 2为找回密码
@@ -437,12 +391,10 @@ function airQuery(req, res, next) {
 }
 
 module.exports = {
-    uploadstorefile: uploadStoreFile,
     login: login,
     register: register,
     getcode: verifyCode,
     fixpwd: fixpwd,
     sendmail: sendCutomMail,
-    readfile: readExcel,
-    airquery: airQuery
+    readfile: readExcel
 };
