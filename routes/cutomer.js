@@ -19,5 +19,9 @@ router.post("/airquery", queryRoute.airquery);
 router.post("/uploadfile", fileRoute.uploadfile);
 router.post("/info/get", infoRoute.getinfo);
 router.post("/info/set", infoRoute.setinfo);
+router.post("/adminlogin", infoRoute.adminLogin);
+router.post("/ad/get", infoRoute.getAd);
+router.post("/ad/add", infoRoute.addAd);
+router.post("/ad/remove", infoRoute.removeAd);
 
 module.exports = router;
