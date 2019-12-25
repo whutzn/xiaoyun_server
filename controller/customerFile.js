@@ -70,23 +70,39 @@ let submitFile = (req, res, next) => {
         config = new qiniu.conf.Config();
     config.zone = qiniu.zone.Zone_z1;
 
-    let localFile = "./public/files/data.xls",
-        formUploader = new qiniu.form_up.FormUploader(config),
-        putExtra = new qiniu.form_up.PutExtra(),
-        key = 'data.xls';
-    // 文件上传
-    formUploader.putFile(uploadToken, key, localFile, putExtra, function(respErr,
-        respBody, respInfo) {
-        if (respErr) {
-            throw respErr;
+    upload.single("file")(req, res, function(err) {
+        if (err instanceof multer.MulterError) {
+            console.log("upload customer file1", err);
+            res.send({
+                code: 1,
+                desc: err
+            });
+        } else if (err) {
+            console.log("upload customer file2", err);
+            res.send({
+                code: 1,
+                desc: err
+            });
         }
-        if (respInfo.statusCode == 200) {
-            console.log(respBody);
-            res.send("ok");
-        } else {
-            console.log(respInfo.statusCode);
-            console.log(respBody);
-        }
+
+        let localFile = "./public/customer/" + req.file.filename,
+            formUploader = new qiniu.form_up.FormUploader(config),
+            putExtra = new qiniu.form_up.PutExtra(),
+            key = req.file.filename;
+        // 文件上传
+        formUploader.putFile(uploadToken, key, localFile, putExtra, function(respErr,
+            respBody, respInfo) {
+            if (respErr) {
+                throw respErr;
+            }
+            if (respInfo.statusCode == 200) {
+                console.log(respBody);
+                res.send({ code: 0, "msg": "ok" });
+            } else {
+                console.log(respInfo.statusCode);
+                console.log(respBody);
+            }
+        });
     });
 }
 
