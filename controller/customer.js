@@ -1,17 +1,6 @@
-let multer = require("multer"),
-    fs = require("fs"),
-    nodemailer = require("nodemailer"),
-    xlsx = require("node-xlsx"),
-    storage = multer.diskStorage({
-        destination: function(req, file, cb) {
-            cb(null, "./public/store");
-        },
-        filename: function(req, file, cb) {
-            let str = file.originalname.split(".");
-            cb(null, Date.now() + "." + str[1]);
-        }
-    }),
-    upload = multer({ storage: storage });
+let nodemailer = require("nodemailer"),
+    xlsx = require("node-xlsx");
+
 // 开启一个SMTP连接
 let transporter = nodemailer.createTransport({
     host: "smtp.exmail.qq.com",
@@ -339,51 +328,6 @@ function fixpwd(req, res, next) {
                     JSON.stringify({
                         code: 0,
                         desc: "set pwd success"
-                    })
-                );
-        });
-    });
-}
-
-function airQuery(req, res, next) {
-    let start = req.query.start || req.body.start || "",
-        end = req.query.end || req.body.end || "";
-
-    if (start == "" && end == "") {
-        res.send(
-            JSON.stringify({
-                code: 3,
-                desc: "invalid input"
-            })
-        );
-        return;
-    }
-
-    req.getConnection(function(err, conn) {
-        if (err) return next(err);
-
-        let sql = "SELECT * FROM air_trans_query WHERE CONCAT(dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" + start + "%' AND CONCAT(des_airport_cn,des_airport_en,des_airport_code) LIKE '%" + end + "%'";
-
-        if (start == "") {
-            sql = "SELECT DISTINCT des_airport_cn,des_airport_en,des_airport_code  FROM air_trans_query WHERE CONCAT(des_airport_cn,des_airport_en,des_airport_code) LIKE '%" + end + "%'";
-        }
-        if (end == "") {
-            sql = "SELECT DISTINCT dep_airport_cn,dep_airport_en,dep_airport_code  FROM air_trans_query WHERE CONCAT(dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" + start + "%'";
-        }
-
-        conn.query(sql, [], function(err, rows) {
-            if (err) {
-                res.send(
-                    JSON.stringify({
-                        code: 1,
-                        desc: "air query error"
-                    })
-                );
-            } else
-                res.send(
-                    JSON.stringify({
-                        code: 0,
-                        desc: rows
                     })
                 );
         });

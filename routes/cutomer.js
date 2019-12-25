@@ -17,6 +17,8 @@ router.post("/readfile", customerRoute.readfile);
 router.post("/airquery", queryRoute.airquery);
 
 router.post("/uploadfile", fileRoute.uploadfile);
+router.post("/uploadqiniu", fileRoute.uploadqiniu);
+
 router.post("/info/get", infoRoute.getinfo);
 router.post("/info/set", infoRoute.setinfo);
 router.post("/adminlogin", infoRoute.adminLogin);
