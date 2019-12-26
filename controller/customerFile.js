@@ -1,4 +1,5 @@
 let multer = require("multer"),
+    axios = require("axios"),
     fs = require("fs"),
     qiniu = require("qiniu"),
     storage = multer.diskStorage({
@@ -90,7 +91,7 @@ let submitFile = (req, res, next) => {
             putExtra = new qiniu.form_up.PutExtra(),
             key = req.file.filename;
         // 文件上传
-        formUploader.putFile(uploadToken, key, localFile, putExtra, function(respErr,
+        formUploader.putFile(uploadToken, "空运" + key, localFile, putExtra, function(respErr,
             respBody, respInfo) {
             if (respErr) {
                 throw respErr;
@@ -98,6 +99,9 @@ let submitFile = (req, res, next) => {
             if (respInfo.statusCode == 200) {
                 console.log(respBody);
                 res.send({ code: 0, "msg": "ok" });
+                axios.post("http://localhost:3000/admin/customer/readfile", {
+                    filename: key
+                });
             } else {
                 console.log(respInfo.statusCode);
                 console.log(respBody);

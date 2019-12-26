@@ -56,7 +56,8 @@ function sendCutomMail(req, res, next) {
 }
 
 function readExcel(req, res, next) {
-    var sheets = xlsx.parse("./public/files/data.xls");
+    let filename = req.query.filename || req.body.filename || "",
+        sheets = xlsx.parse("./public/customer/" + filename);
     var queryData = [];
     var curId = 0;
     // 遍历 sheet
@@ -87,12 +88,23 @@ function readExcel(req, res, next) {
             }
             curData.push(element[10]);
             curData.push(element[11]);
-            curData.push(element[5] || 0);
-            curData.push(element[6] || 0);
-            curData.push(element[7] || 0);
-            curData.push(element[23] || 0);
-            curData.push(element[24] || 0);
-            curData.push(element[25] || 0);
+            let dep = [],
+                des = [],
+                air = [];
+            dep.push(typeof(element[5]) == "null" ? '0' : element[5]);
+            dep.push(typeof(element[6]) == "null" ? '0' : element[6]);
+            dep.push(typeof(element[7]) == "null" ? '0' : element[7]);
+            dep.push(typeof(element[8]) == "null" ? '0' : element[8]);
+            dep.push(typeof(element[9]) == "null" ? '0' : element[9]);
+            des.push(typeof(element[23]) == "null" ? '0' : element[23]);
+            des.push(typeof(element[24]) == "null" ? '0' : element[24]);
+            des.push(typeof(element[25]) == "null" ? '0' : element[25]);
+            for (let index = 13; index < 22; index++) {
+                air.push(typeof(element[index]) == "null" ? '0' : element[index]);
+            }
+            curData.push(dep.join(','));
+            curData.push(des.join(','));
+            curData.push(air.join(','));
             queryData.push(curData);
             // console.log(curId, curData);
         }
@@ -101,7 +113,7 @@ function readExcel(req, res, next) {
     req.getConnection(function(err, conn) {
         if (err) return next(err);
         let addSQL =
-            "INSERT INTO `word2.0`.`air_trans_query`(`airline`, `airline_code`, `dep_airport_cn`, `dep_airport_en`, `dep_airport_code`, `dep_airport_country`, `des_airport_cn`, `des_airport_en`, `des_airport_code`, `des_airport_country`, `dep_delcare`, `dep_thc`, `dep_doc`, `des_delcare`, `des_thc`, `des_doc`) VALUES ?";
+            "INSERT INTO `word2.0`.`air_trans_query`(`airline`, `airline_code`, `dep_airport_cn`, `dep_airport_en`, `dep_airport_code`, `dep_airport_country`, `des_airport_cn`, `des_airport_en`, `des_airport_code`, `des_airport_country`, `dep_charges`, `des_charges`, `air_freight`) VALUES ?";
 
         conn.query(addSQL, [queryData], function(err, rows) {
             if (err) {
@@ -111,10 +123,11 @@ function readExcel(req, res, next) {
                     desc: "database error"
                 });
             } else {
-                res.send({
-                    code: 0,
-                    desc: "ok"
-                });
+                // res.send({
+                //     code: 0,
+                //     desc: "ok"
+                // });
+                console.log(filename + " read success");
             }
         });
     });
