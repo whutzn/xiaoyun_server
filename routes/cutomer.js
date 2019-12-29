@@ -18,6 +18,7 @@ router.post("/airquery", queryRoute.airquery);
 
 router.post("/uploadfile", fileRoute.uploadfile);
 router.post("/uploadqiniu", fileRoute.uploadqiniu);
+router.post("/getqiniu", fileRoute.getqiniu);
 
 router.post("/info/get", infoRoute.getinfo);
 router.post("/info/set", infoRoute.setinfo);

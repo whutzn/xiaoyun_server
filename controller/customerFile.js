@@ -59,6 +59,8 @@ let uploadCustomerFile = (req, res, next) => {
     });
 }
 
+let FILE_TYPE = ['空运', '快递', '铁路', '海运拼箱', '海运整箱']
+
 let submitFile = (req, res, next) => {
     let accessKey = 'w2KFQdp7UqbTlwW8SNtA-ocr353c5L4rnpx4D5yN',
         secretKey = 'JciOohK_OJwSiGZBTwUmSUpw1aRNwgKS2Byi-uGP',
@@ -89,18 +91,34 @@ let submitFile = (req, res, next) => {
         let localFile = "./public/customer/" + req.file.filename,
             formUploader = new qiniu.form_up.FormUploader(config),
             putExtra = new qiniu.form_up.PutExtra(),
-            key = req.file.filename;
+            key = req.file.filename,
+            type = req.query.type || req.body.type || '';
         // 文件上传
-        formUploader.putFile(uploadToken, "空运" + key, localFile, putExtra, function(respErr,
+        formUploader.putFile(uploadToken, FILE_TYPE[type - 1] + key, localFile, putExtra, function(respErr,
             respBody, respInfo) {
             if (respErr) {
                 throw respErr;
             }
             if (respInfo.statusCode == 200) {
                 console.log(respBody);
-                res.send({ code: 0, "msg": "ok" });
-                axios.post("http://localhost:3000/admin/customer/readfile", {
-                    filename: key
+                req.getConnection(function(err, conn) {
+                    if (err) return next(err);
+                    let addSQL = "INSERT INTO customer_upload(`name`,type,addTime) VALUES(?,?,NOW());";
+
+                    conn.query(addSQL, [FILE_TYPE[type - 1] + key, type], function(err, rows) {
+                        if (err) {
+                            console.error("query error" + err);
+                            res.send({
+                                code: 1,
+                                desc: "database error"
+                            });
+                        } else {
+                            res.send({ code: 0, "desc": "ok" });
+                            axios.post("http://localhost:3000/admin/customer/readfile", {
+                                filename: key
+                            });
+                        }
+                    });
                 });
             } else {
                 console.log(respInfo.statusCode);
@@ -110,7 +128,35 @@ let submitFile = (req, res, next) => {
     });
 }
 
+let getFile = (req, res, next) => {
+    let type = req.query.type || req.body.type || "";
+
+    req.getConnection(function(err, conn) {
+        if (err) return next(err);
+
+        let sql = "SELECT * FROM customer_upload WHERE type = ?";
+
+        conn.query(sql, [type], function(err, rows) {
+            if (err) {
+                res.send(
+                    JSON.stringify({
+                        code: 1,
+                        desc: "qiniu query error"
+                    })
+                );
+            } else
+                res.send(
+                    JSON.stringify({
+                        code: 0,
+                        desc: rows
+                    })
+                );
+        });
+    });
+}
+
 module.exports = {
     uploadfile: uploadCustomerFile,
-    uploadqiniu: submitFile
+    uploadqiniu: submitFile,
+    getqiniu: getFile
 }
