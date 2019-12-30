@@ -155,8 +155,37 @@ let getFile = (req, res, next) => {
     });
 }
 
+let downloadFile = (req, res, next) => {
+    let fileName = req.query.fileName || req.body.fileName || "";
+    if (fileName == "") {
+        res.send(
+            JSON.stringify({
+                code: 0,
+                desc: 'invalid input'
+            })
+        );
+        return;
+    }
+    let accessKey = 'w2KFQdp7UqbTlwW8SNtA-ocr353c5L4rnpx4D5yN',
+        secretKey = 'JciOohK_OJwSiGZBTwUmSUpw1aRNwgKS2Byi-uGP',
+        mac = new qiniu.auth.digest.Mac(accessKey, secretKey),
+        config = new qiniu.conf.Config();
+
+    let bucketManager = new qiniu.rs.BucketManager(mac, config),
+        privateBucketDomain = 'http://q32mff2hm.bkt.clouddn.com',
+        deadline = parseInt(Date.now() / 1000) + 3600, // 1小时过期
+        privateDownloadUrl = bucketManager.privateDownloadUrl(privateBucketDomain, fileName, deadline);
+    res.send(
+        JSON.stringify({
+            code: 0,
+            desc: privateDownloadUrl
+        })
+    );
+}
+
 module.exports = {
     uploadfile: uploadCustomerFile,
     uploadqiniu: submitFile,
-    getqiniu: getFile
+    getqiniu: getFile,
+    downloadfile: downloadFile
 }
