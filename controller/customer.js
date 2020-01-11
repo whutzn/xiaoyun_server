@@ -120,6 +120,55 @@ function airRead1(curData, element) {
     curData.push(nondoc.join(','));
 }
 
+function airRead2(curData, element) {
+    if (element.length < 15) {
+        let arrLength = 15 - element.length;
+        for (let i = 0; i < arrLength; i++) element.push('');
+    }
+    curData.push(element[0]);
+    curData.push(element[1] || '');
+    curData.push(element[2] || '');
+    curData.push(element[3] || '');
+    curData.push(element[4] || '');
+    curData.push(element[5] || '');
+
+    let charge = [],
+        charge1 = [],
+        charge2 = [];
+
+    for (let index = 6; index < 9; index++) {
+        if (element[index] == '') {
+            charge.push(element[index]);
+        } else {
+            if (!isNaN(element[index])) element[index] = element[index].toFixed(2);
+            charge.push(typeof(element[index]) == "null" ? '0' : element[index]);
+        }
+    }
+
+    for (let index = 9; index < 12; index++) {
+        if (element[index] == '') {
+            charge1.push(element[index]);
+        } else {
+            if (!isNaN(element[index])) element[index] = element[index].toFixed(2);
+            charge1.push(typeof(element[index]) == "null" ? '0' : element[index]);
+        }
+    }
+
+    for (let index = 12; index < 14; index++) {
+        if (element[index] == '') {
+            charge2.push(element[index]);
+        } else {
+            if (!isNaN(element[index])) element[index] = element[index].toFixed(2);
+            charge2.push(typeof(element[index]) == "null" ? '0' : element[index]);
+        }
+    }
+    curData.push(charge.join(','));
+    curData.push(charge1.join(','));
+    curData.push(charge2.join(','));
+    curData.push(element[14] || '');
+    curData.push(element[15] || '');
+}
+
 function readExcel(req, res, next) {
     let filename = req.query.filename || req.body.filename || "",
         type = req.query.type || req.body.type,
@@ -135,6 +184,7 @@ function readExcel(req, res, next) {
             var curData = [];
             if (type == 1) airRead(curData, element);
             else if (type == 2) airRead1(curData, element);
+            else if (type == 3) airRead2(curData, element);
             queryData.push(curData);
             // console.log(curId, curData);
         }
@@ -146,6 +196,7 @@ function readExcel(req, res, next) {
             "INSERT INTO `word2.0`.`air_trans_query`(`airline`, `airline_code`, `dep_airport_cn`, `dep_airport_en`, `dep_airport_code`, `dep_airport_country`, `des_airport_cn`, `des_airport_en`, `des_airport_code`, `des_airport_country`, `dep_charges`, `des_charges`, `air_freight`) VALUES ?";
 
         if (type == 2) addSQL = "INSERT INTO delivery_trans_query(zone,zone_code,country_cn,country_en,doc_charge,nondoc_charge) VALUES ?";
+        else if (type == 3) addSQL = "INSERT INTO train_trans_query(`start`,`stop`,transit,`end`,platform_code,trans_time,charge,charge1,charge2,charge_other,remark) VALUES ?";
 
         conn.query(addSQL, [queryData], function(err, rows) {
             if (err) {

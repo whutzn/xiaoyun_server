@@ -102,5 +102,50 @@ module.exports = {
                     );
             });
         });
-    }
+    },
+    trainquery: (req, res, next) => {
+        let start = req.query.start || req.body.start || "",
+            end = req.query.end || req.body.end || "";
+
+        if (start == "" && end == "") {
+            res.send(
+                JSON.stringify({
+                    code: 3,
+                    desc: "invalid input"
+                })
+            );
+            return;
+        }
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "SELECT DISTINCT * FROM train_trans_query WHERE `start` = '" + start + "' AND `end` = '" + end + "' ";
+
+            if (start == "") {
+                sql = "SELECT DISTINCT `end` FROM train_trans_query WHERE `end` LIKE '%" +
+                    end + "%'";
+            }
+            if (end == "") {
+                sql = "SELECT DISTINCT `start` FROM train_trans_query WHERE `start` LIKE '%" + start + "%'";
+            }
+
+            conn.query(sql, [], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "air query error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: rows
+                        })
+                    );
+            });
+        });
+    },
 };
