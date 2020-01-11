@@ -1,3 +1,6 @@
+let sillydate = require("silly-datetime");
+
+
 function searchFiled(sql, filed, name) {
     if (filed != "") {
         if (sql.indexOf("WHERE") >= 0) {
@@ -8,6 +11,10 @@ function searchFiled(sql, filed, name) {
     }
     return sql;
 };
+
+function PrefixZero(num, n) {
+    return (Array(n).join(0) + num).slice(-n);
+}
 
 module.exports = {
     airquery: (req, res, next) => {
@@ -178,10 +185,10 @@ module.exports = {
 
         req.getConnection(function(err, conn) {
             if (err) return next(err);
+            let today = sillydate.format(new Date(), 'YYMMDD');
 
-            let sql = "INSERT INTO customer_order(customerid,is_export,is_aboard,customer_query,type) VALUES (?,?,?,?,?);";
-
-            conn.query(sql, [customerid, is_export, is_aboard, customer_query, type], function(err, rows) {
+            let sql1 = "SELECT COUNT(*) AS num FROM customer_order WHERE business_number LIKE '%" + today + "%'";
+            conn.query(sql1, [], function(err, rows1) {
                 if (err) {
                     res.send(
                         JSON.stringify({
@@ -189,13 +196,28 @@ module.exports = {
                             desc: "upload query error"
                         })
                     );
-                } else
-                    res.send(
-                        JSON.stringify({
-                            code: 0,
-                            desc: 'upload success'
-                        })
-                    );
+                } else {
+                    let curnum = rows1[0].num + 1;
+
+                    let sql = "INSERT INTO customer_order(customerid,is_export,is_aboard,customer_query,type,business_number) VALUES (?,?,?,?,?,?);";
+
+                    conn.query(sql, [customerid, is_export, is_aboard, customer_query, type, 'SFF2' + today + PrefixZero(curnum, 3)], function(err, rows) {
+                        if (err) {
+                            res.send(
+                                JSON.stringify({
+                                    code: 1,
+                                    desc: "upload query error"
+                                })
+                            );
+                        } else
+                            res.send(
+                                JSON.stringify({
+                                    code: 0,
+                                    desc: 'upload success'
+                                })
+                            );
+                    });
+                }
             });
         });
     },

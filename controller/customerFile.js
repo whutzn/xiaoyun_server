@@ -2,6 +2,7 @@ let multer = require("multer"),
     axios = require("axios"),
     fs = require("fs"),
     qiniu = require("qiniu"),
+    pdf = require('html-pdf'),
     storage = multer.diskStorage({
         destination: function(req, file, cb) {
             cb(null, "./public/customer");
@@ -201,9 +202,26 @@ let downloadFile = (req, res, next) => {
     );
 }
 
+let createPdf = (req, res, next) => {
+
+    var html = fs.readFileSync('./public/files/index.html', 'utf8');
+    var options = { format: 'A4' };
+    pdf.create(html, options).toFile('./public/businesscard.pdf', function(err, res1) {
+        if (err) return console.log(err);
+        console.log(res1); // { filename: '/app/businesscard.pdf' }
+        res.send(
+            JSON.stringify({
+                code: 0,
+                desc: res1
+            })
+        );
+    });
+}
+
 module.exports = {
     uploadfile: uploadCustomerFile,
     uploadqiniu: submitFile,
     getqiniu: getFile,
-    downloadfile: downloadFile
+    downloadfile: downloadFile,
+    createpdf: createPdf
 }
