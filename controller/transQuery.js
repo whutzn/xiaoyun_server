@@ -1,3 +1,14 @@
+function searchFiled(sql, filed, name) {
+    if (filed != "") {
+        if (sql.indexOf("WHERE") >= 0) {
+            sql += " AND " + name + "= '" + filed + "'";
+        } else {
+            sql += "WHERE " + name + " = '" + filed + "'";
+        }
+    }
+    return sql;
+};
+
 module.exports = {
     airquery: (req, res, next) => {
         let start = req.query.start || req.body.start || "",
@@ -90,7 +101,7 @@ module.exports = {
                     res.send(
                         JSON.stringify({
                             code: 1,
-                            desc: "air query error"
+                            desc: "delivery query error"
                         })
                     );
                 } else
@@ -135,7 +146,7 @@ module.exports = {
                     res.send(
                         JSON.stringify({
                             code: 1,
-                            desc: "air query error"
+                            desc: "train query error"
                         })
                     );
                 } else
@@ -143,6 +154,154 @@ module.exports = {
                         JSON.stringify({
                             code: 0,
                             desc: rows
+                        })
+                    );
+            });
+        });
+    },
+    uploadquery: (req, res, next) => {
+        let customerid = req.query.customerid || req.body.customerid,
+            is_export = req.query.export || req.body.export,
+            is_aboard = req.query.aboard || req.body.aboard,
+            customer_query = req.query.customerquery || req.body.customerquery || '',
+            type = req.query.type || req.body.type;
+
+        if (customer_query == "") {
+            res.send(
+                JSON.stringify({
+                    code: 3,
+                    desc: "invalid input"
+                })
+            );
+            return;
+        }
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "INSERT INTO customer_order(customerid,is_export,is_aboard,customer_query,type) VALUES (?,?,?,?,?);";
+
+            conn.query(sql, [customerid, is_export, is_aboard, customer_query, type], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "upload query error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: 'upload success'
+                        })
+                    );
+            });
+        });
+    },
+    querylist: (req, res, next) => {
+        let id = req.query.id || req.body.id || '',
+            is_export = req.query.export || req.body.export || '',
+            is_aboard = req.query.aboard || req.body.aboard || '',
+            status = req.query.status || req.body.status || '',
+            pageSize = req.body.pageSize || req.query.pageSize || "",
+            pageNum = req.body.pageNum || req.query.pageNum || "";
+
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "SELECT SQL_CALC_FOUND_ROWS * FROM customer_order ";
+
+            sql = searchFiled(sql, id, 'id');
+            sql = searchFiled(sql, is_export, 'is_export');
+            sql = searchFiled(sql, is_aboard, 'is_aboard');
+            sql = searchFiled(sql, status, 'status');
+
+            if (pageNum != "" && pageSize != "") {
+                let start = (pageNum - 1) * pageSize;
+                sql += " LIMIT " + start + "," + pageSize;
+            }
+
+            sql += ";SELECT FOUND_ROWS() AS total;";
+
+            conn.query(sql, [], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "list query error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: rows
+                        })
+                    );
+            });
+        });
+    },
+    removelist: (req, res, next) => {
+        let id = req.query.id || req.body.id || '';
+
+        if (id == "") {
+            res.send(
+                JSON.stringify({
+                    code: 3,
+                    desc: "invalid input"
+                })
+            );
+            return;
+        }
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "DELETE FROM customer_order WHERE id = ?";
+
+            conn.query(sql, [id], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "remove query error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: 'remove success'
+                        })
+                    );
+            });
+        });
+    },
+    updatelist: (req, res, next) => {
+        let id = req.query.id || req.body.id || '',
+            admin_price = req.query.price || req.body.price || '',
+            status = req.query.status || req.body.status || '';
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "UPDATE customer_order SET admin_price = ?, `status` = ? WHERE id = ?";
+
+            conn.query(sql, [admin_price, status, id], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "update query error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: 'update success'
                         })
                     );
             });
