@@ -55,56 +55,86 @@ function sendCutomMail(req, res, next) {
     });
 }
 
+function airRead(curData, element) {
+    curData.push(element[0]);
+    curData.push(element[1]);
+    element[4] += '';
+    element[12] += '';
+    if (element[4].indexOf(" ") >= 0) {
+        curData.push(element[4].split(/ (.*)/)[0]);
+        curData.push(element[4].split(/ (.*)/)[1]);
+    } else {
+        curData.push(element[4]);
+        curData.push(element[4]);
+    }
+
+    curData.push(element[2]);
+    curData.push(element[3]);
+    if (element[12].indexOf(" ") >= 0) {
+        curData.push(element[12].split(/ (.*)/)[0]);
+        curData.push(element[12].split(/ (.*)/)[1]);
+    } else {
+        curData.push(element[12]);
+        curData.push(element[12]);
+    }
+    curData.push(element[10]);
+    curData.push(element[11]);
+    let dep = [],
+        des = [],
+        air = [];
+    dep.push(typeof(element[5]) == "null" ? '0' : element[5]);
+    dep.push(typeof(element[6]) == "null" ? '0' : element[6]);
+    dep.push(typeof(element[7]) == "null" ? '0' : element[7]);
+    dep.push(typeof(element[8]) == "null" ? '0' : element[8]);
+    dep.push(typeof(element[9]) == "null" ? '0' : element[9]);
+    des.push(typeof(element[23]) == "null" ? '0' : element[23]);
+    des.push(typeof(element[24]) == "null" ? '0' : element[24]);
+    des.push(typeof(element[25]) == "null" ? '0' : element[25]);
+    for (let index = 13; index < 22; index++) {
+        air.push(typeof(element[index]) == "null" ? '0' : element[index]);
+    }
+    curData.push(dep.join(','));
+    curData.push(des.join(','));
+    curData.push(air.join(','));
+}
+
+function airRead1(curData, element) {
+    curData.push(element[1]);
+    curData.push(element[2]);
+    curData.push(element[3]);
+    curData.push(element[4]);
+
+    let doc = [],
+        nondoc = [];
+
+    for (let index = 5; index < 10; index++) {
+        if (!isNaN(element[index])) element[index] = element[index].toFixed(2);
+        doc.push(typeof(element[index]) == "null" ? '0' : element[index]);
+    }
+
+    for (let index = 10; index < 55; index++) {
+        if (!isNaN(element[index])) element[index] = element[index].toFixed(2);
+        nondoc.push(typeof(element[index]) == "null" ? '0' : element[index]);
+    }
+    curData.push(doc.join(','));
+    curData.push(nondoc.join(','));
+}
+
 function readExcel(req, res, next) {
     let filename = req.query.filename || req.body.filename || "",
+        type = req.query.type || req.body.type,
         sheets = xlsx.parse("./public/customer/" + filename);
     var queryData = [];
-    var curId = 0;
+    var curId = 0,
+        startIndex = 2;
+    if (type == 2) startIndex = 3;
     // 遍历 sheet
     sheets[0].data.forEach(element => {
         // console.log(element);
-        if (curId > 2) {
+        if (curId > startIndex) {
             var curData = [];
-            curData.push(element[0]);
-            curData.push(element[1]);
-            element[4] += '';
-            element[12] += '';
-            if (element[4].indexOf(" ") >= 0) {
-                curData.push(element[4].split(/ (.*)/)[0]);
-                curData.push(element[4].split(/ (.*)/)[1]);
-            } else {
-                curData.push(element[4]);
-                curData.push(element[4]);
-            }
-
-            curData.push(element[2]);
-            curData.push(element[3]);
-            if (element[12].indexOf(" ") >= 0) {
-                curData.push(element[12].split(/ (.*)/)[0]);
-                curData.push(element[12].split(/ (.*)/)[1]);
-            } else {
-                curData.push(element[12]);
-                curData.push(element[12]);
-            }
-            curData.push(element[10]);
-            curData.push(element[11]);
-            let dep = [],
-                des = [],
-                air = [];
-            dep.push(typeof(element[5]) == "null" ? '0' : element[5]);
-            dep.push(typeof(element[6]) == "null" ? '0' : element[6]);
-            dep.push(typeof(element[7]) == "null" ? '0' : element[7]);
-            dep.push(typeof(element[8]) == "null" ? '0' : element[8]);
-            dep.push(typeof(element[9]) == "null" ? '0' : element[9]);
-            des.push(typeof(element[23]) == "null" ? '0' : element[23]);
-            des.push(typeof(element[24]) == "null" ? '0' : element[24]);
-            des.push(typeof(element[25]) == "null" ? '0' : element[25]);
-            for (let index = 13; index < 22; index++) {
-                air.push(typeof(element[index]) == "null" ? '0' : element[index]);
-            }
-            curData.push(dep.join(','));
-            curData.push(des.join(','));
-            curData.push(air.join(','));
+            if (type == 1) airRead(curData, element);
+            else if (type == 2) airRead1(curData, element);
             queryData.push(curData);
             // console.log(curId, curData);
         }
@@ -114,6 +144,8 @@ function readExcel(req, res, next) {
         if (err) return next(err);
         let addSQL =
             "INSERT INTO `word2.0`.`air_trans_query`(`airline`, `airline_code`, `dep_airport_cn`, `dep_airport_en`, `dep_airport_code`, `dep_airport_country`, `des_airport_cn`, `des_airport_en`, `des_airport_code`, `des_airport_country`, `dep_charges`, `des_charges`, `air_freight`) VALUES ?";
+
+        if (type == 2) addSQL = "INSERT INTO delivery_trans_query(zone,zone_code,country_cn,country_en,doc_charge,nondoc_charge) VALUES ?";
 
         conn.query(addSQL, [queryData], function(err, rows) {
             if (err) {

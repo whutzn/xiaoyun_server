@@ -15,6 +15,9 @@ router.post("/readfile", customerRoute.readfile);
 
 
 router.post("/airquery", queryRoute.airquery);
+router.post("/deliveryquery", queryRoute.delievryquery);
+
+router.post("/getdeliverycity", queryRoute.getdeliverycity);
 
 router.post("/uploadfile", fileRoute.uploadfile);
 router.post("/uploadqiniu", fileRoute.uploadqiniu);

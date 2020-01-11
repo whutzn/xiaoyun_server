@@ -59,7 +59,8 @@ let uploadCustomerFile = (req, res, next) => {
     });
 }
 
-let FILE_TYPE = ['空运', '快递', '铁路', '海运拼箱', '海运整箱']
+let FILE_TYPE = ['空运', '快递', '铁路', '海运拼箱', '海运整箱'],
+    TABLE_NAME = ['air_trans_query', 'delivery_trans_query', 'tarin_trans_query', 'ship_trans_query', 'ship1_trans_query'];
 
 let submitFile = (req, res, next) => {
     let accessKey = 'w2KFQdp7UqbTlwW8SNtA-ocr353c5L4rnpx4D5yN',
@@ -103,19 +104,36 @@ let submitFile = (req, res, next) => {
                 console.log(respBody);
                 req.getConnection(function(err, conn) {
                     if (err) return next(err);
+                    let clearSql = "TRUNCATE " + TABLE_NAME[type - 1];
+
                     let addSQL = "INSERT INTO customer_upload(`name`,type,addTime) VALUES(?,?,NOW());";
 
-                    conn.query(addSQL, [FILE_TYPE[type - 1] + key, type], function(err, rows) {
-                        if (err) {
-                            console.error("query error" + err);
+                    conn.query(clearSql, [], function(err1, rows1) {
+                        if (err1) {
+                            console.error("clear error" + err1);
                             res.send({
                                 code: 1,
-                                desc: "database error"
+                                desc: "clear error"
                             });
                         } else {
-                            res.send({ code: 0, "desc": "ok" });
-                            axios.post("http://localhost:3000/admin/customer/readfile", {
-                                filename: key
+                            let addSQL = "INSERT INTO customer_upload(`name`,type,addTime) VALUES(?,?,NOW());";
+
+                            conn.query(addSQL, [FILE_TYPE[type - 1] + key, type], function(err, rows) {
+                                if (err) {
+                                    console.error("query error" + err);
+                                    res.send({
+                                        code: 1,
+                                        desc: "database error"
+                                    });
+                                } else {
+                                    res.send({ code: 0, "desc": "ok" });
+                                    axios.post("http://localhost:3000/admin/customer/readfile", {
+                                        filename: key,
+                                        type: type
+                                    }).catch((error) => {
+                                        console.log("error: " + error.message);
+                                    });
+                                }
                             });
                         }
                     });
