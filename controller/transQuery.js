@@ -168,8 +168,6 @@ module.exports = {
     },
     uploadquery: (req, res, next) => {
         let customerid = req.query.customerid || req.body.customerid,
-            is_export = req.query.export || req.body.export,
-            is_aboard = req.query.aboard || req.body.aboard,
             customer_query = req.query.customerquery || req.body.customerquery || '',
             type = req.query.type || req.body.type;
 
@@ -199,9 +197,9 @@ module.exports = {
                 } else {
                     let curnum = rows1[0].num + 1;
 
-                    let sql = "INSERT INTO customer_order(customerid,is_export,is_aboard,customer_query,type,business_number) VALUES (?,?,?,?,?,?);";
+                    let sql = "INSERT INTO customer_order(customerid,customer_query,type,business_number) VALUES (?,?,?,?);";
 
-                    conn.query(sql, [customerid, is_export, is_aboard, customer_query, type, 'SFF2' + today + PrefixZero(curnum, 3)], function(err, rows) {
+                    conn.query(sql, [customerid, customer_query, type, 'SFF2' + today + PrefixZero(curnum, 3)], function(err, rows) {
                         if (err) {
                             res.send(
                                 JSON.stringify({
@@ -303,15 +301,17 @@ module.exports = {
     },
     updatelist: (req, res, next) => {
         let id = req.query.id || req.body.id || '',
+            is_export = req.query.export || req.body.export,
+            is_aboard = req.query.aboard || req.body.aboard,
             admin_price = req.query.price || req.body.price || '',
             status = req.query.status || req.body.status || '';
 
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "UPDATE customer_order SET admin_price = ?, `status` = ? WHERE id = ?";
+            let sql = "UPDATE customer_order SET is_export = ?, is_aboard = ?, admin_price = ?, `status` = ? WHERE id = ?";
 
-            conn.query(sql, [admin_price, status, id], function(err, rows) {
+            conn.query(sql, [is_export, is_aboard, admin_price, status, id], function(err, rows) {
                 if (err) {
                     res.send(
                         JSON.stringify({
