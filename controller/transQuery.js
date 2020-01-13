@@ -238,6 +238,8 @@ module.exports = {
             sql = searchFiled(sql, is_aboard, 'is_aboard');
             sql = searchFiled(sql, status, 'status');
 
+            sql += " ORDER BY id DESC";
+
             if (pageNum != "" && pageSize != "") {
                 let start = (pageNum - 1) * pageSize;
                 sql += " LIMIT " + start + "," + pageSize;
@@ -301,17 +303,15 @@ module.exports = {
     },
     updatelist: (req, res, next) => {
         let id = req.query.id || req.body.id || '',
-            is_export = req.query.export || req.body.export,
-            is_aboard = req.query.aboard || req.body.aboard,
             admin_price = req.query.price || req.body.price || '',
             status = req.query.status || req.body.status || '';
 
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "UPDATE customer_order SET is_export = ?, is_aboard = ?, admin_price = ?, `status` = ? WHERE id = ?";
+            let sql = "UPDATE customer_order SET admin_price = ?, `status` = ? WHERE id = ?";
 
-            conn.query(sql, [is_export, is_aboard, admin_price, status, id], function(err, rows) {
+            conn.query(sql, [admin_price, status, id], function(err, rows) {
                 if (err) {
                     res.send(
                         JSON.stringify({
@@ -326,6 +326,98 @@ module.exports = {
                             desc: 'update success'
                         })
                     );
+            });
+        });
+    },
+    setordertype: (req, res, next) => {
+        let id = req.query.id || req.body.id || '',
+            is_export = req.query.export || req.body.export,
+            is_aboard = req.query.aboard || req.body.aboard;
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "UPDATE customer_order SET is_export = ?, is_aboard = ? WHERE id = ?";
+
+            conn.query(sql, [is_export, is_aboard, id], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "set type error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: 'set type success'
+                        })
+                    );
+            });
+        });
+    },
+    getorder: (req, res, next) => {
+        let id = req.query.id || req.body.id || '';
+
+        if (id == "") {
+            res.send(
+                JSON.stringify({
+                    code: 3,
+                    desc: "invalid input"
+                })
+            );
+            return;
+        }
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "SELECT * FROM customer_order WHERE id = ?";
+
+            conn.query(sql, [id], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "get order query error"
+                        })
+                    );
+                } else {
+                    let curStatus = rows[0].status;
+                    if (curStatus == 3) {
+                        res.send(
+                            JSON.stringify({
+                                code: 1,
+                                desc: '已完成'
+                            })
+                        );
+                    } else if (curStatus == 4) {
+                        res.send(
+                            JSON.stringify({
+                                code: 2,
+                                desc: '正在编辑'
+                            })
+                        );
+                    } else {
+                        let sql1 = "UPDATE customer_order SET `status` = 4 WHERE id = ?";
+                        conn.query(sql1, [id], function(err1, rows1) {
+                            if (err1) {
+                                res.send(
+                                    JSON.stringify({
+                                        code: 1,
+                                        desc: "get order " + err1
+                                    })
+                                );
+                            } else res.send(
+                                JSON.stringify({
+                                    code: 0,
+                                    desc: rows[0]
+                                })
+                            );
+                        });
+                    }
+                }
             });
         });
     },

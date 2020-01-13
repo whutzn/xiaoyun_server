@@ -22,6 +22,8 @@ router.post("/uploadquery", queryRoute.uploadquery);
 router.post("/querylist", queryRoute.querylist);
 router.post("/removelist", queryRoute.removelist);
 router.post("/updatelist", queryRoute.updatelist);
+router.post("/setordertype", queryRoute.setordertype);
+router.post("/getorder", queryRoute.getorder);
 
 router.post("/getdeliverycity", queryRoute.getdeliverycity);
 
