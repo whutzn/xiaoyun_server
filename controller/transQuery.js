@@ -309,14 +309,24 @@ module.exports = {
     updatelist: (req, res, next) => {
         let id = req.query.id || req.body.id || '',
             admin_price = req.query.price || req.body.price || '',
-            status = req.query.status || req.body.status || '';
+            admin_price1 = req.query.price1 || req.body.price1 || '',
+            status = req.query.status || req.body.status || '',
+            curPrice = '';
 
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
             let sql = "UPDATE customer_order SET admin_price = ?, `status` = ? WHERE id = ?";
 
-            conn.query(sql, [admin_price, status, id], function(err, rows) {
+            if (admin_price1 == '') {
+                sql = "UPDATE customer_order SET admin_price = ?, `status` = ? WHERE id = ?";
+                curPrice = admin_price;
+            } else if (admin_price == '') {
+                sql = "UPDATE customer_order SET admin_price1 = ?, `status` = ? WHERE id = ?";
+                curPrice = admin_price1;
+            }
+
+            conn.query(sql, [curPrice, status, id], function(err, rows) {
                 if (err) {
                     res.send(
                         JSON.stringify({
