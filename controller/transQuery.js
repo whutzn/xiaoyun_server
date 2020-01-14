@@ -65,7 +65,8 @@ module.exports = {
         });
     },
     delievryquery: (req, res, next) => {
-        let end = req.query.end || req.body.end || "";
+        let end = req.query.end || req.body.end || "",
+        mode = req.query.mode || req.body.mode || "";
 
         if (end == "") {
             res.send(
@@ -79,8 +80,12 @@ module.exports = {
 
         req.getConnection(function(err, conn) {
             if (err) return next(err);
-
             let sql = "SELECT * FROM delivery_trans_query  WHERE CONCAT(country_cn,country_en) LIKE '%" + end + "%'";
+            if(mode == 1) {
+                sql = "SELECT DISTINCT country_cn,country_en FROM `delivery_trans_query` WHERE CONCAT(country_cn,country_en) LIKE '%" + end + "%'";
+            }else if(mode == 2) {
+                sql = "SELECT  * FROM `delivery_trans_query` WHERE country_cn = '"+end+"' OR country_en = '"+end+"'";
+            }
 
             conn.query(sql, [], function(err, rows) {
                 if (err) {
