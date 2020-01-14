@@ -4,9 +4,9 @@ let sillydate = require("silly-datetime");
 function searchFiled(sql, filed, name) {
     if (filed != "") {
         if (sql.indexOf("WHERE") >= 0) {
-            sql += " AND " + name + "= '" + filed + "'";
+            sql += " AND customer_order." + name + "= '" + filed + "'";
         } else {
-            sql += "WHERE " + name + " = '" + filed + "'";
+            sql += "WHERE customer_order." + name + " = '" + filed + "'";
         }
     }
     return sql;
@@ -160,7 +160,7 @@ module.exports = {
     },
     delievryquery: (req, res, next) => {
         let end = req.query.end || req.body.end || "",
-        mode = req.query.mode || req.body.mode || "";
+            mode = req.query.mode || req.body.mode || "";
 
         if (end == "") {
             res.send(
@@ -175,10 +175,10 @@ module.exports = {
         req.getConnection(function(err, conn) {
             if (err) return next(err);
             let sql = "SELECT * FROM delivery_trans_query  WHERE CONCAT(country_cn,country_en) LIKE '%" + end + "%'";
-            if(mode == 1) {
+            if (mode == 1) {
                 sql = "SELECT DISTINCT country_cn,country_en FROM `delivery_trans_query` WHERE CONCAT(country_cn,country_en) LIKE '%" + end + "%'";
-            }else if(mode == 2) {
-                sql = "SELECT  * FROM `delivery_trans_query` WHERE country_cn = '"+end+"' OR country_en = '"+end+"'";
+            } else if (mode == 2) {
+                sql = "SELECT  * FROM `delivery_trans_query` WHERE country_cn = '" + end + "' OR country_en = '" + end + "'";
             }
 
             conn.query(sql, [], function(err, rows) {
@@ -330,14 +330,14 @@ module.exports = {
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "SELECT SQL_CALC_FOUND_ROWS * FROM customer_order ";
+            let sql = "SELECT SQL_CALC_FOUND_ROWS customer_order.*, customer.account FROM customer_order LEFT JOIN customer ON customer_order.customerid = customer.id ";
 
             sql = searchFiled(sql, id, 'id');
             sql = searchFiled(sql, is_export, 'is_export');
             sql = searchFiled(sql, is_aboard, 'is_aboard');
             sql = searchFiled(sql, status, 'status');
 
-            sql += " ORDER BY id DESC";
+            sql += " ORDER BY customer_order.id DESC";
 
             if (pageNum != "" && pageSize != "") {
                 let start = (pageNum - 1) * pageSize;

@@ -1,4 +1,5 @@
 let nodemailer = require("nodemailer"),
+    pdf = require('html-pdf'),
     xlsx = require("node-xlsx");
 
 // 开启一个SMTP连接
@@ -48,10 +49,54 @@ let send = function(subject, content, flag) {
 };
 
 function sendCutomMail(req, res, next) {
-    send("这是邮件标题", "<b>这是邮件内容-html</b>", "html");
-    res.send({
-        code: 0,
-        desc: "send ok!"
+    let account = req.query.account || req.body.account || "",
+        id = req.query.id || req.body.id || "",
+        html = req.query.html || req.body.html || "",
+        name = req.query.name || req.body.name || "";
+
+    var options = { format: 'A4' };
+    pdf.create(html, options).toFile('./public/files/' + name + '.pdf', function(err, res1) {
+        if (err) return console.log(err);
+        let mailOptions = {
+            from: '"客户服务" <sale@sharingfreight.com>', // 发件人
+            to: account, // 收件人
+            subject: "测试报价单邮件", // 标题
+            // 发送text或者html格式
+            text: "", // plain text body 文本格式的内容
+            html: "<br>报价单请查收</br>", // html body HTML格式的内容
+            attachments: [{
+                filename: name + '.pdf',
+                path: './public/files/' + name + '.pdf'
+            }]
+        };
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log("send mail1 error", error);
+            } else {
+                req.getConnection(function(err, conn) {
+                    if (err) return next(err);
+
+                    var sql = "UPDATE customer_order SET `status` = 3 WHERE id = ?";
+
+                    conn.query(sql, [id], function(err, rows) {
+                        if (err) {
+                            res.send(
+                                JSON.stringify({
+                                    code: 1,
+                                    desc: "send mail1 error"
+                                })
+                            );
+                        } else
+                            res.send(
+                                JSON.stringify({
+                                    code: 0,
+                                    desc: 'send success'
+                                })
+                            );
+                    });
+                });
+            }
+        });
     });
 }
 
@@ -184,8 +229,8 @@ function readExcel(req, res, next) {
     var curId = 0,
         startIndex = 2;
     if (type == 2) startIndex = 3;
-    else if(type == 4) startIndex = 1;
-    else if(type == 5) startIndex = 1;
+    else if (type == 4) startIndex = 1;
+    else if (type == 5) startIndex = 1;
     // 遍历 sheet
     sheets[0].data.forEach(element => {
         // console.log(element);
