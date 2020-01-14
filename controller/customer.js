@@ -169,6 +169,13 @@ function airRead2(curData, element) {
     curData.push(element[15] || '');
 }
 
+function airRead3(curData, element) {
+    curData.push(0);
+    for (let index = 0; index < 18; index++) {
+        curData.push(element[index]);
+    }
+}
+
 function readExcel(req, res, next) {
     let filename = req.query.filename || req.body.filename || "",
         type = req.query.type || req.body.type,
@@ -177,6 +184,8 @@ function readExcel(req, res, next) {
     var curId = 0,
         startIndex = 2;
     if (type == 2) startIndex = 3;
+    else if(type == 4) startIndex = 1;
+    else if(type == 5) startIndex = 1;
     // 遍历 sheet
     sheets[0].data.forEach(element => {
         // console.log(element);
@@ -185,6 +194,7 @@ function readExcel(req, res, next) {
             if (type == 1) airRead(curData, element);
             else if (type == 2) airRead1(curData, element);
             else if (type == 3) airRead2(curData, element);
+            else airRead3(curData, element);
             queryData.push(curData);
             // console.log(curId, curData);
         }
@@ -197,6 +207,8 @@ function readExcel(req, res, next) {
 
         if (type == 2) addSQL = "INSERT INTO delivery_trans_query(zone,zone_code,country_cn,country_en,doc_charge,nondoc_charge) VALUES ?";
         else if (type == 3) addSQL = "INSERT INTO train_trans_query(`start`,`stop`,transit,`end`,platform_code,trans_time,charge,charge1,charge2,charge_other,remark) VALUES ?";
+        else if (type == 4) addSQL = "INSERT INTO ship1_trans_query VALUES ?";
+        else if (type == 5) addSQL = "INSERT INTO ship_trans_query VALUES ?";
 
         conn.query(addSQL, [queryData], function(err, rows) {
             if (err) {

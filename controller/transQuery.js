@@ -64,6 +64,100 @@ module.exports = {
             });
         });
     },
+    shipquery: (req, res, next) => {
+        let start = req.query.start || req.body.start || "",
+            end = req.query.end || req.body.end || "";
+
+        if (start == "" && end == "") {
+            res.send(
+                JSON.stringify({
+                    code: 3,
+                    desc: "invalid input"
+                })
+            );
+            return;
+        }
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "SELECT * FROM ship_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" + start +
+                "%' AND CONCAT(des_port_cn,des_port_en) LIKE '%" + end + "%'";
+
+            if (start == "") {
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
+                    end + "%'";
+            }
+            if (end == "") {
+                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
+                    start + "%'";
+            }
+
+            conn.query(sql, [], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "ship query error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: rows
+                        })
+                    );
+            });
+        });
+    },
+    shipquery1: (req, res, next) => {
+        let start = req.query.start || req.body.start || "",
+            end = req.query.end || req.body.end || "";
+
+        if (start == "" && end == "") {
+            res.send(
+                JSON.stringify({
+                    code: 3,
+                    desc: "invalid input"
+                })
+            );
+            return;
+        }
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql = "SELECT * FROM ship1_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" + start +
+                "%' AND CONCAT(des_port_cn,des_port_en) LIKE '%" + end + "%'";
+
+            if (start == "") {
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship1_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
+                    end + "%'";
+            }
+            if (end == "") {
+                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship1_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
+                    start + "%'";
+            }
+
+            conn.query(sql, [], function(err, rows) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "ship1 query error"
+                        })
+                    );
+                } else
+                    res.send(
+                        JSON.stringify({
+                            code: 0,
+                            desc: rows
+                        })
+                    );
+            });
+        });
+    },
     delievryquery: (req, res, next) => {
         let end = req.query.end || req.body.end || "",
         mode = req.query.mode || req.body.mode || "";

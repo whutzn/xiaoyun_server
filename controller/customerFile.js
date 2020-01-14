@@ -61,7 +61,7 @@ let uploadCustomerFile = (req, res, next) => {
 }
 
 let FILE_TYPE = ['空运', '快递', '铁路', '海运拼箱', '海运整箱'],
-    TABLE_NAME = ['air_trans_query', 'delivery_trans_query', 'train_trans_query', 'ship_trans_query', 'ship1_trans_query'];
+    TABLE_NAME = ['air_trans_query', 'delivery_trans_query', 'train_trans_query', 'ship1_trans_query', 'ship_trans_query'];
 
 let submitFile = (req, res, next) => {
     let accessKey = 'w2KFQdp7UqbTlwW8SNtA-ocr353c5L4rnpx4D5yN',
