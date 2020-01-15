@@ -41,4 +41,6 @@ router.post("/ad/get", infoRoute.getAd);
 router.post("/ad/add", infoRoute.addAd);
 router.post("/ad/remove", infoRoute.removeAd);
 
+router.post("/readorder", queryRoute.readOrder);
+
 module.exports = router;

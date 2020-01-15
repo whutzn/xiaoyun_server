@@ -1,5 +1,6 @@
 let sillydate = require("silly-datetime");
 
+let FILE_TYPE = ['空运', '国际快递', '铁路', '海运拼箱', '海运整箱'];
 
 function searchFiled(sql, filed, name) {
     if (filed != "") {
@@ -410,17 +411,20 @@ module.exports = {
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "UPDATE customer_order SET admin_price = ?, `status` = ? WHERE id = ?";
+            let sql = "UPDATE customer_order SET admin_price = ?,admin_price1 = ?, `status` = ? WHERE id = ?",
+                params = [admin_price, admin_price1, status, id];
 
             if (admin_price1 == '') {
                 sql = "UPDATE customer_order SET admin_price = ?, `status` = ? WHERE id = ?";
                 curPrice = admin_price;
+                params = [curPrice, status, id];
             } else if (admin_price == '') {
                 sql = "UPDATE customer_order SET admin_price1 = ?, `status` = ? WHERE id = ?";
                 curPrice = admin_price1;
+                params = [curPrice, status, id];
             }
 
-            conn.query(sql, [curPrice, status, id], function(err, rows) {
+            conn.query(sql, params, function(err, rows) {
                 if (err) {
                     res.send(
                         JSON.stringify({
@@ -524,6 +528,117 @@ module.exports = {
                                     desc: rows[0]
                                 })
                             );
+                        });
+                    }
+                }
+            });
+        });
+    },
+    readOrder: (req, res, next) => {
+        let id = req.query.id || req.body.id || '';
+
+        req.getConnection(function(err, conn) {
+            if (err) return next(err);
+
+            let sql1 = "SELECT customer_order.*, customer.account, customer.phone FROM customer_order LEFT JOIN customer ON customer_order.customerid = customer.id WHERE customer_order.id = ?"
+
+            conn.query(sql1, [id], function(err, rows1) {
+                if (err) {
+                    res.send(
+                        JSON.stringify({
+                            code: 1,
+                            desc: "read order1 error " + err
+                        })
+                    );
+                } else {
+                    if (rows1.length > 0) {
+                        let sql = "INSERT INTO `word2.0`.`business`(`user_id`, `business_number`, `origin`, `destination`, `inco_term`, `business_type`, `pay_type`, `pouch_docs`, `insurance_requirement`, `url`, `hbl_mbl`, `shipper_name`, `shipper_address`, `shipper_contact`, `shipper_usci_code`, `order_date`, `pick_up_date`, `pick_up_contact`, `pick_up_mobile`, `pick_up_address`, `tell_date`, `arrive_date`, `clear_date`, `send_date`, `consignee_name`, `consignee_address`, `consignee_contact`, `consignee_enterprise_code`, `notify_name`, `notify_address`, `notify_contact`, `marks`, `pieces`, `gross_weight`, `chargable_weight`, `commodity_name`, `hs_code`, `package_dimension`, `exchange_rate`, `exchange_rmb`, `reconciliation_date`, `invoice_date`, `remark`, `create_time`, `update_time`) VALUES ?",
+                            params = [],
+                            customer_query = JSON.parse(rows1[0].customer_query.replace(/[\r\n\s+]/g, '')),
+                            price = JSON.parse(rows1[0].admin_price.replace(/[\r\n\s+]/g, '')),
+                            price1 = JSON.parse(rows1[0].admin_price1.replace(/[\r\n\s+]/g, ''));
+
+                        params.push(rows1[0].customerid);
+                        params.push(rows1[0].business_number);
+                        params.push(customer_query.entryPort);
+                        params.push(customer_query.exitPort);
+                        params.push('');
+                        let depway = FILE_TYPE[rows1[0].type - 1];
+                        if (rows1[0].type == 2 || rows1[0].type == 3) {
+                            params.push(depway);
+                        } else {
+                            depway += rows1[0].is_export == 1 ? '出口' : '进口';
+                            params.push(depway);
+                        }
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push(rows1[0].account);
+                        params.push('');
+                        params.push(rows1[0].phone);
+                        params.push('');
+                        params.push(new Date());
+                        params.push(price.tiHuoDate || null);
+                        params.push(price.chenYunName);
+                        params.push(rows1[0].phone);
+                        params.push(customer_query.tiAddress);
+                        params.push(price1.tiHuoDate);
+                        params.push(price1.daoDaDate);
+                        params.push(price1.qingGuanDate);
+                        params.push(price1.paiSongDate);
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push('');
+                        params.push(customer_query.productCount + typeof customer_query.containerType == 'undefined' ? customer_query.containerType : '');
+                        params.push(customer_query.allWeight);
+                        params.push(customer_query.chargingWeight);
+                        params.push(customer_query.productName);
+                        params.push('');
+                        params.push(customer_query.productLong + "*" + customer_query.productWidth + "*" + customer_query.productHeight);
+                        params.push(price.moneyType);
+                        params.push(price1.moneyType);
+                        params.push('0000-00-00');
+                        params.push('0000-00-00');
+                        params.push('');
+                        params.push(new Date());
+                        params.push(new Date());
+
+
+                        conn.query(sql, [
+                            [params]
+                        ], function(err, rows) {
+                            if (err) {
+                                res.send(
+                                    JSON.stringify({
+                                        code: 1,
+                                        desc: "read order error " + err
+                                    })
+                                );
+                            } else {
+                                let sql1 = "UPDATE customer_order SET `status` = 5 WHERE id = ?";
+                                conn.query(sql1, [id], function(err1, rows1) {
+                                    if (err1) {
+                                        res.send(
+                                            JSON.stringify({
+                                                code: 1,
+                                                desc: "set order send " + err1
+                                            })
+                                        );
+                                    } else res.send(
+                                        JSON.stringify({
+                                            code: 0,
+                                            desc: 'read order success'
+                                        })
+                                    );
+                                });
+                            }
                         });
                     }
                 }
