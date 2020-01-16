@@ -86,11 +86,11 @@ module.exports = {
                 "%' AND CONCAT(des_port_cn,des_port_en) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
                     start + "%'";
             }
 
@@ -133,11 +133,11 @@ module.exports = {
                 "%' AND CONCAT(des_port_cn,des_port_en) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship1_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT des_port_cn,des_port_en  FROM ship1_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship1_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship1_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
                     start + "%'";
             }
 

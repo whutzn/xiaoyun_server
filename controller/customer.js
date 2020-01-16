@@ -216,9 +216,49 @@ function airRead2(curData, element) {
 
 function airRead3(curData, element) {
     curData.push(0);
-    for (let index = 0; index < 18; index++) {
-        curData.push(element[index]);
+    if (element.length < 17) {
+        let arrLength = 17 - element.length;
+        for (let i = 0; i < arrLength; i++) element.push('');
     }
+
+    for (let index = 5; index < 9; index++) {
+        curData.push(element[index] || '');
+    }
+    curData.push(typeof(element[15]) == "null" ? '0' : element[15]);
+    curData.push(typeof(element[16]) == "null" ? '0' : element[16]);
+    curData.push(element[9] || '');
+    let fee = [];
+    for (let index = 10; index < 13; index++) {
+        fee.push(typeof(element[index]) == "null" ? '0' : element[index]);
+    }
+    curData.push(fee.join(','));
+    curData.push(element[13] || '');
+    curData.push(element[14] || '');
+    curData.push(element[3] || '');
+    curData.push(element[4] || '');
+
+}
+
+function airRead4(curData, element) {
+    curData.push(0);
+    if (element.length < 17) {
+        let arrLength = 17 - element.length;
+        for (let i = 0; i < arrLength; i++) element.push('');
+    }
+
+    for (let index = 5; index < 9; index++) {
+        curData.push(typeof(element[index]) == "null" ? '0' : element[index]);
+    }
+    curData.push(typeof(element[15]) == "null" ? '0' : element[15]);
+    curData.push(typeof(element[16]) == "null" ? '0' : element[16]);
+    curData.push(element[9] || '');
+    curData.push(element[11] || '');
+    curData.push(element[13] || '');
+    curData.push(element[14] || '');
+    curData.push(element[3] || '');
+    curData.push(element[4] || '');
+    curData.push(element[10] || '');
+    curData.push(element[12] || '');
 }
 
 function readExcel(req, res, next) {
@@ -229,8 +269,8 @@ function readExcel(req, res, next) {
     var curId = 0,
         startIndex = 2;
     if (type == 2) startIndex = 3;
-    else if (type == 4) startIndex = 1;
-    else if (type == 5) startIndex = 1;
+    else if (type == 4) startIndex = 0;
+    else if (type == 5) startIndex = 0;
     // 遍历 sheet
     sheets[0].data.forEach(element => {
         // console.log(element);
@@ -239,7 +279,8 @@ function readExcel(req, res, next) {
             if (type == 1) airRead(curData, element);
             else if (type == 2) airRead1(curData, element);
             else if (type == 3) airRead2(curData, element);
-            else airRead3(curData, element);
+            else if (type == 5) airRead3(curData, element);
+            else if (type == 4) airRead4(curData, element);
             queryData.push(curData);
             // console.log(curId, curData);
         }
