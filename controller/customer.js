@@ -10,8 +10,20 @@ let transporter = nodemailer.createTransport({
     secureConnection: true, // 使用了SSL
     secure: true, // true for 465, false for other ports
     auth: {
-        user: "sale@sharingfreight.com",
-        pass: "B4sCTkePs3ZxJR3G" // 这里密码不是qq密码，是你设置的smtp授权码
+        user: "service@freightinquiry.com",
+        pass: "BVt2g8zTgaYppiUx" // 这里密码不是qq密码，是你设置的smtp授权码
+    }
+});
+
+let transporter1 = nodemailer.createTransport({
+    host: "smtp.exmail.qq.com",
+    // service: "qq", // 需要到qq邮箱设置开通SMTP, 查看支持的邮件服务商列表 https://nodemailer.com/smtp/well-known/
+    port: 465, // SMTP 端口
+    secureConnection: true, // 使用了SSL
+    secure: true, // true for 465, false for other ports
+    auth: {
+        user: "sale@freightinquiry.com",
+        pass: "LftPYCzig8zVLbM3" // 这里密码不是qq密码，是你设置的smtp授权码
     }
 });
 
@@ -52,15 +64,16 @@ function sendCutomMail(req, res, next) {
     let account = req.query.account || req.body.account || "",
         id = req.query.id || req.body.id || "",
         html = req.query.html || req.body.html || "",
-        name = req.query.name || req.body.name || "";
+        name = req.query.name || req.body.name || "",
+        subject = req.query.subject || req.body.subject || "",
 
-    var options = { format: 'A4' };
+        var options = { format: 'A4' };
     pdf.create(html, options).toFile('./public/files/' + name + '.pdf', function(err, res1) {
         if (err) return console.log(err);
         let mailOptions = {
-            from: '"客户服务" <sale@sharingfreight.com>', // 发件人
+            from: '"客户服务" <sale@freightinquiry.com>', // 发件人
             to: account, // 收件人
-            subject: "测试报价单邮件", // 标题
+            subject: subject, // 标题
             // 发送text或者html格式
             text: "", // plain text body 文本格式的内容
             html: "<br>报价单请查收</br>", // html body HTML格式的内容
@@ -69,7 +82,7 @@ function sendCutomMail(req, res, next) {
                 path: './public/files/' + name + '.pdf'
             }]
         };
-        transporter.sendMail(mailOptions, (error, info) => {
+        transporter1.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.log("send mail1 error", error);
             } else {
@@ -321,7 +334,7 @@ function verifyCode(req, res, next) {
         code = generateShareCode();
 
     let codemailOptions = {
-        from: '"客户服务" <sale@sharingfreight.com>', // 发件人
+        from: '"客户服务" <service@freightinquiry.com>', // 发件人
         to: account, // 收件人
         subject: "测试邮件", // 标题
         // 发送text或者html格式

@@ -190,7 +190,7 @@ let downloadFile = (req, res, next) => {
         config = new qiniu.conf.Config();
 
     let bucketManager = new qiniu.rs.BucketManager(mac, config),
-        privateBucketDomain = 'http://q32mff2hm.bkt.clouddn.com',
+        privateBucketDomain = 'http://cdn.freightinquiry.com',
         deadline = parseInt(Date.now() / 1000) + 3600, // 1小时过期
         privateDownloadUrl = bucketManager.privateDownloadUrl(privateBucketDomain, fileName, deadline);
     res.send(
