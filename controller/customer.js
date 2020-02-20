@@ -65,9 +65,9 @@ function sendCutomMail(req, res, next) {
         id = req.query.id || req.body.id || "",
         html = req.query.html || req.body.html || "",
         name = req.query.name || req.body.name || "",
-        subject = req.query.subject || req.body.subject || "",
+        subject = req.query.subject || req.body.subject || "";
 
-        var options = { format: 'A4' };
+    var options = { format: 'A4' };
     pdf.create(html, options).toFile('./public/files/' + name + '.pdf', function(err, res1) {
         if (err) return console.log(err);
         let mailOptions = {

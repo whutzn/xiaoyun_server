@@ -35,15 +35,15 @@ module.exports = {
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "SELECT * FROM air_trans_query WHERE CONCAT(dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" + start +
-                "%' AND CONCAT(des_airport_cn,des_airport_en,des_airport_code) LIKE '%" + end + "%'";
+            let sql = "SELECT * FROM air_trans_query WHERE CONCAT_WS(',',dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" + start +
+                "%' AND CONCAT_WS(',',des_airport_cn,des_airport_en,des_airport_code) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT des_airport_cn,des_airport_en,des_airport_code  FROM air_trans_query WHERE CONCAT(des_airport_cn,des_airport_en,des_airport_code) LIKE '%" +
+                sql = "SELECT DISTINCT des_airport_cn,des_airport_en,des_airport_code  FROM air_trans_query WHERE CONCAT_WS(',',des_airport_cn,des_airport_en,des_airport_code) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT dep_airport_cn,dep_airport_en,dep_airport_code  FROM air_trans_query WHERE CONCAT(dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" +
+                sql = "SELECT DISTINCT dep_airport_cn,dep_airport_en,dep_airport_code  FROM air_trans_query WHERE CONCAT_WS(',',dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" +
                     start + "%'";
             }
 
@@ -82,15 +82,15 @@ module.exports = {
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "SELECT * FROM ship_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" + start +
-                "%' AND CONCAT(des_port_cn,des_port_en) LIKE '%" + end + "%'";
+            let sql = "SELECT * FROM ship_trans_query WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" + start +
+                "%' AND CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship_trans_query WHERE CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship_trans_query WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" +
                     start + "%'";
             }
 
@@ -129,15 +129,15 @@ module.exports = {
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "SELECT * FROM ship1_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" + start +
-                "%' AND CONCAT(des_port_cn,des_port_en) LIKE '%" + end + "%'";
+            let sql = "SELECT * FROM ship1_trans_query WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" + start +
+                "%' AND CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT des_port_cn,des_port_en  FROM ship1_trans_query WHERE CONCAT(des_port_cn,des_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT des_port_cn,des_port_en  FROM ship1_trans_query WHERE CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship1_trans_query WHERE CONCAT(dep_port_cn,dep_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship1_trans_query WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" +
                     start + "%'";
             }
 
@@ -175,9 +175,9 @@ module.exports = {
 
         req.getConnection(function(err, conn) {
             if (err) return next(err);
-            let sql = "SELECT * FROM delivery_trans_query  WHERE CONCAT(country_cn,country_en) LIKE '%" + end + "%'";
+            let sql = "SELECT * FROM delivery_trans_query  WHERE CONCAT_WS(',',country_cn,country_en) LIKE '%" + end + "%'";
             if (mode == 1) {
-                sql = "SELECT DISTINCT country_cn,country_en FROM `delivery_trans_query` WHERE CONCAT(country_cn,country_en) LIKE '%" + end + "%'";
+                sql = "SELECT DISTINCT country_cn,country_en FROM `delivery_trans_query` WHERE CONCAT_WS(',',country_cn,country_en) LIKE '%" + end + "%'";
             } else if (mode == 2) {
                 sql = "SELECT  * FROM `delivery_trans_query` WHERE country_cn = '" + end + "' OR country_en = '" + end + "'";
             }
