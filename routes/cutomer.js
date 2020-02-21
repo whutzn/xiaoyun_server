@@ -43,4 +43,8 @@ router.post("/ad/remove", infoRoute.removeAd);
 
 router.post("/readorder", queryRoute.readOrder);
 
+router.post("/getexchange", queryRoute.getExchange);
+router.post("/setexchange", queryRoute.setExchange);
+router.post("/getcity", queryRoute.getCity);
+
 module.exports = router;
