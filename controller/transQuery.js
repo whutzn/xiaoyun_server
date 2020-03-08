@@ -187,16 +187,6 @@ module.exports = {
         let start = req.query.start || req.body.start || "",
             end = req.query.end || req.body.end || "";
 
-        if (start == "" && end == "") {
-            res.send(
-                JSON.stringify({
-                    code: 3,
-                    desc: "invalid input"
-                })
-            );
-            return;
-        }
-
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
@@ -210,6 +200,10 @@ module.exports = {
             if (end == "") {
                 sql = "SELECT DISTINCT dep_airport_cn,dep_airport_en,dep_airport_code  FROM air_trans_query WHERE CONCAT_WS(',',dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" +
                     start + "%'";
+            }
+
+            if (start == "" && end == "") {
+                sql = "SELECT DISTINCT * FROM air_trans_query WHERE `show` = 1;"
             }
 
             conn.query(sql, [], function(err, rows) {
@@ -234,16 +228,6 @@ module.exports = {
         let start = req.query.start || req.body.start || "",
             end = req.query.end || req.body.end || "";
 
-        if (start == "" && end == "") {
-            res.send(
-                JSON.stringify({
-                    code: 3,
-                    desc: "invalid input"
-                })
-            );
-            return;
-        }
-
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
@@ -251,12 +235,16 @@ module.exports = {
                 "%' AND CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT des_port_cn,des_port_en FROM ship_trans_query WHERE CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT des_port_cn,des_port_en,des_country_cn,des_country_en FROM ship_trans_query WHERE CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship_trans_query WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en,dep_country_cn,dep_country_en FROM ship_trans_query WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" +
                     start + "%'";
+            }
+
+            if (start == "" && end == "") {
+                sql = "SELECT DISTINCT * FROM ship_trans_query WHERE `show` = 1;"
             }
 
             conn.query(sql, [], function(err, rows) {
@@ -281,16 +269,6 @@ module.exports = {
         let start = req.query.start || req.body.start || "",
             end = req.query.end || req.body.end || "";
 
-        if (start == "" && end == "") {
-            res.send(
-                JSON.stringify({
-                    code: 3,
-                    desc: "invalid input"
-                })
-            );
-            return;
-        }
-
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
@@ -298,12 +276,16 @@ module.exports = {
                 "%' AND CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT des_port_cn,des_port_en  FROM ship1_trans_query WHERE CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT des_port_cn,des_port_en,des_country_cn,des_country_en  FROM ship1_trans_query WHERE CONCAT_WS(',',des_port_cn,des_port_en) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT dep_port_cn,dep_port_en FROM ship1_trans_query WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" +
+                sql = "SELECT DISTINCT dep_port_cn,dep_port_en,dep_country_cn,dep_country_en WHERE CONCAT_WS(',',dep_port_cn,dep_port_en) LIKE '%" +
                     start + "%'";
+            }
+
+            if (start == "" && end == "") {
+                sql = "SELECT DISTINCT * FROM ship1_trans_query WHERE `show` = 1;"
             }
 
             conn.query(sql, [], function(err, rows) {
@@ -325,27 +307,22 @@ module.exports = {
         });
     },
     delievryquery: (req, res, next) => {
-        let end = req.query.end || req.body.end || "",
-            mode = req.query.mode || req.body.mode || "";
-
-        if (end == "") {
-            res.send(
-                JSON.stringify({
-                    code: 3,
-                    desc: "invalid input"
-                })
-            );
-            return;
-        }
+        let start = req.query.start || req.body.start || "",
+            end = req.query.end || req.body.end || "";
 
         req.getConnection(function(err, conn) {
             if (err) return next(err);
-            let sql = "SELECT * FROM delivery_trans_query  WHERE CONCAT_WS(',',country_cn,country_en) LIKE '%" + end + "%'";
-            if (mode == 1) {
+            let sql = "SELECT * FROM `delivery_trans_query`  WHERE CONCAT_WS(',',country_cn,country_en) LIKE '%" + end + "%' AND CONCAT_WS(',',dep_country_cn,dep_country_en) LIKE '%" + start + "%'";
+            if (start == '') {
                 sql = "SELECT DISTINCT country_cn,country_en FROM `delivery_trans_query` WHERE CONCAT_WS(',',country_cn,country_en) LIKE '%" + end + "%'";
-            } else if (mode == 2) {
-                sql = "SELECT  * FROM `delivery_trans_query` WHERE country_cn = '" + end + "' OR country_en = '" + end + "'";
             }
+            if (end == '') {
+                sql = "SELECT  DISTINCT dep_country_cn,dep_country_en FROM `delivery_trans_query` WHERE CONCAT_WS(',',dep_country_cn,dep_country_en) LIKE '%" + start + "%'";
+            }
+            if (start == "" && end == "") {
+                sql = "SELECT DISTINCT * FROM `delivery_trans_query` WHERE `show` = 1;"
+            }
+
 
             conn.query(sql, [], function(err, rows) {
                 if (err) {
@@ -390,27 +367,19 @@ module.exports = {
         let start = req.query.start || req.body.start || "",
             end = req.query.end || req.body.end || "";
 
-        if (start == "" && end == "") {
-            res.send(
-                JSON.stringify({
-                    code: 3,
-                    desc: "invalid input"
-                })
-            );
-            return;
-        }
-
         req.getConnection(function(err, conn) {
             if (err) return next(err);
 
-            let sql = "SELECT DISTINCT * FROM train_trans_query WHERE `start` = '" + start + "' AND `end` = '" + end + "' ";
+            let sql = "SELECT DISTINCT * FROM train_trans_query WHERE CONCAT_WS(',', `des_city_cn`, `des_city_en`) LIKE '%" + end + "%' AND CONCAT_WS(',', `dep_city_cn`, `dep_city_en`) LIKE '%" + start + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT `end` FROM train_trans_query WHERE `end` LIKE '%" +
-                    end + "%'";
+                sql = "SELECT DISTINCT `des_country_cn`, `des_country_en`, `des_city_cn`, `des_city_en` FROM train_trans_query WHERE CONCAT_WS(',', `des_city_cn`, `des_city_en`) LIKE '%" + end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT `start` FROM train_trans_query WHERE `start` LIKE '%" + start + "%'";
+                sql = "SELECT DISTINCT `dep_country_cn`, `dep_country_en`, `dep_city_cn`, `dep_city_en` FROM train_trans_query WHERE CONCAT_WS(',', `dep_city_cn`, `dep_city_en`) LIKE '%" + start + "%'";
+            }
+            if (start == "" && end == "") {
+                sql = "SELECT DISTINCT * FROM train_trans_query WHERE `show` = 1;"
             }
 
             conn.query(sql, [], function(err, rows) {
@@ -418,7 +387,7 @@ module.exports = {
                     res.send(
                         JSON.stringify({
                             code: 1,
-                            desc: "train query error"
+                            desc: "train query error：" + err
                         })
                     );
                 } else
@@ -714,7 +683,8 @@ module.exports = {
         }
     },
     getorder: (req, res, next) => {
-        let id = req.query.id || req.body.id || '';
+        let id = req.query.id || req.body.id || '',
+            status = req.query.status || req.body.status || '';
 
         if (id == "") {
             res.send(
@@ -741,23 +711,23 @@ module.exports = {
                     );
                 } else {
                     let curStatus = rows[0].status;
-                    if (curStatus == 3) {
+                    if (curStatus == 6) {
                         res.send(
                             JSON.stringify({
                                 code: 1,
-                                desc: '已完成'
+                                desc: '国外正在编辑'
                             })
                         );
                     } else if (curStatus == 4) {
                         res.send(
                             JSON.stringify({
                                 code: 2,
-                                desc: '正在编辑'
+                                desc: '国内正在编辑'
                             })
                         );
                     } else {
-                        let sql1 = "UPDATE customer_order SET `status` = 4 WHERE id = ?";
-                        conn.query(sql1, [id], function(err1, rows1) {
+                        let sql1 = "UPDATE customer_order SET `status` = ? WHERE id = ?";
+                        conn.query(sql1, [status, id], function(err1, rows1) {
                             if (err1) {
                                 res.send(
                                     JSON.stringify({
@@ -801,7 +771,7 @@ module.exports = {
                             price = JSON.parse(rows1[0].admin_price.replace(/[\r\n\s+]/g, '')),
                             price1 = JSON.parse(rows1[0].admin_price1.replace(/[\r\n\s+]/g, ''));
 
-                        params.push(rows1[0].customerid);
+                        params.push(10);
                         params.push(rows1[0].business_number);
                         params.push(customer_query.entryPort);
                         params.push(customer_query.exitPort);
