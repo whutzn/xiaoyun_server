@@ -150,7 +150,7 @@ function airRead(curData, element) {
     curData.push(element[6]);
     curData.push(element[7]);
     let air = [];
-    for (let index = 9; index < 17; index++) {
+    for (let index = 9; index < 18; index++) {
         air.push(typeof(element[index]) == "null" ? '0' : element[index]);
     }
     curData.push(air.join(','));
