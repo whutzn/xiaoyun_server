@@ -194,11 +194,11 @@ module.exports = {
                 "%' AND CONCAT_WS(',',des_airport_cn,des_airport_en,des_airport_code) LIKE '%" + end + "%'";
 
             if (start == "") {
-                sql = "SELECT DISTINCT des_airport_cn,des_airport_en,des_airport_code  FROM air_trans_query WHERE CONCAT_WS(',',des_airport_cn,des_airport_en,des_airport_code) LIKE '%" +
+                sql = "SELECT DISTINCT des_airport_cn,des_airport_en,des_airport_code,des_airport_country  FROM air_trans_query WHERE CONCAT_WS(',',des_airport_cn,des_airport_en,des_airport_code) LIKE '%" +
                     end + "%'";
             }
             if (end == "") {
-                sql = "SELECT DISTINCT dep_airport_cn,dep_airport_en,dep_airport_code  FROM air_trans_query WHERE CONCAT_WS(',',dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" +
+                sql = "SELECT DISTINCT dep_airport_cn,dep_airport_en,dep_airport_code,dep_airport_country FROM air_trans_query WHERE CONCAT_WS(',',dep_airport_cn,dep_airport_en,dep_airport_code) LIKE '%" +
                     start + "%'";
             }
 
