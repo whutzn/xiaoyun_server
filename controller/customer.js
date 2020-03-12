@@ -126,8 +126,8 @@ function airRead(curData, element) {
         let arrLength = 18 - element.length;
         for (let i = 0; i < arrLength; i++) element.push('');
     }
-    curData.push(element[1]);
-    curData.push(element[2]);
+    curData.push(element[1] || '');
+    curData.push(element[2] || '');
     element[5] += '';
     element[8] += '';
     if (element[5].indexOf(" ") >= 0) {
@@ -138,8 +138,8 @@ function airRead(curData, element) {
         curData.push(element[5]);
     }
 
-    curData.push(element[3]);
-    curData.push(element[4]);
+    curData.push(element[3] || '');
+    curData.push(element[4] || '');
     if (element[8].indexOf(" ") >= 0) {
         curData.push(element[8].split(/ (.*)/)[0]);
         curData.push(element[8].split(/ (.*)/)[1]);
@@ -147,8 +147,8 @@ function airRead(curData, element) {
         curData.push(element[8]);
         curData.push(element[8]);
     }
-    curData.push(element[6]);
-    curData.push(element[7]);
+    curData.push(element[6] || '');
+    curData.push(element[7] || '');
     let air = [];
     for (let index = 9; index < 18; index++) {
         air.push(typeof(element[index]) == "null" ? '0' : element[index]);
@@ -159,11 +159,11 @@ function airRead(curData, element) {
 }
 
 function airRead1(curData, element) {
-    curData.push(element[1]);
-    curData.push(element[2]);
-    curData.push(element[3]);
-    curData.push(element[4]);
-    curData.push(element[5]);
+    curData.push(element[1] || '');
+    curData.push(element[2] || '');
+    curData.push(element[3] || '');
+    curData.push(element[4] || '');
+    curData.push(element[5] || '');
 
     let doc = [],
         nondoc = [];
@@ -351,7 +351,12 @@ function verifyCode(req, res, next) {
                         })
                     );
                 } else if (mode == 2) {
-                    codemailOptions.subject = "找回密码";
+                    codemailOptions.subject = "查运费找回密码";
+                    codemailOptions.html = `<p>Dear ${account}：</p>` +
+                        `<p>&nbsp;&nbsp;&nbsp;&nbsp;欢迎注册查运费账户，我们非常感谢您的信任，查运费系统作为全球领先的互联网国际物流询价报价平台，我们坚持免费服务原则。</p>` +
+                        `<p>查运费找回密码验证码：<u><strong>${code}</strong></u></p>` +
+                        `<p>此验证码5分钟内有效，如验证码失效请到客服网站重新操作！</p>` +
+                        `<p>如非本人操作，请忽略本邮件。</p>`;
                     transporter.sendMail(codemailOptions, (error, info) => {
                         if (error) {
                             console.log("send mail error", error);
